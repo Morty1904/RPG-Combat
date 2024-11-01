@@ -4,17 +4,37 @@ public class Character {
     private int health;
     private int level;
     private boolean isAlive;
+    private int range;
+    private CharacterClass characterClass;
 
-    public Character() {
-        this.health = 1000;
-        this.level = 1;
-        this.isAlive = true;
+    public enum CharacterClass {
+        Melee(2), Ranged(20);
+
+        private final int range;
+
+        CharacterClass(int range) {
+            this.range = range;
+        }
+
+        public int getRange() {
+            return range;
+        }
     }
 
-    public Character(int level) {
+    public Character(int level, CharacterClass characterClass) {
         this.health = 1000;
         this.level = level;
         this.isAlive = true;
+        this.characterClass = characterClass;
+        this.range = characterClass.getRange();
+    }
+
+    public int getRange() {
+        return range;
+    }
+
+    public CharacterClass getCharacterClass() {
+        return characterClass;
     }
 
     public int getHealth() {
@@ -29,8 +49,12 @@ public class Character {
         return isAlive;
     }
 
-    public void dealDamage(Character target, int damageAmount) {
+    public void dealDamage(Character target, int damageAmount, int distance) {
         if (!target.isAlive || target == this) {
+            return;
+        }
+
+        if (distance > this.range) {
             return;
         }
 
