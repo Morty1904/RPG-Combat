@@ -2,60 +2,92 @@ package com.factoriaf5.kata;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class CharacterTest {
 
-    @Test
-    public void ExampleTest() {
-        assertEquals(2, 2);
+    private Character character;
+    private Character target;
+
+    @BeforeEach
+    public void setUp() {
+        character = new Character();
+        target = new Character();
     }
 
     @Test
-    public void testCharacterInitialization() {
-        Character character = new Character();
-        assertEquals(1000, character.getHealth(), "Health should start at 1000");
-        assertEquals(1, character.getLevel(), "Level should start at 1");
-        assertTrue(character.isAlive(), "Character should start alive");
+    public void testDefaultHealth() {
+        assertEquals(1000, character.getHealth());
     }
 
     @Test
-    public void testDealDamageReducesHealth() {
-        Character attacker = new Character();
-        Character target = new Character();
-        attacker.dealDamage(target, 200);
-        assertEquals(800, target.getHealth(), "Health should be reduced by damage amount");
+    public void testDefaultLevel() {
+        assertEquals(1, character.getLevel());
     }
 
     @Test
-    public void testDealDamageKillsCharacter() {
-        Character attacker = new Character();
-        Character target = new Character();
-        attacker.dealDamage(target, 1200);
-        assertEquals(0, target.getHealth(), "Health should be 0 when damage exceeds health");
-        assertFalse(target.isAlive(), "Character should be dead if health is 0");
+    public void testIsAliveByDefault() {
+        assertTrue(character.isAlive());
     }
 
     @Test
-    public void testHealingIncreasesHealth() {
-        Character character = new Character();
-        character.dealDamage(character, 500);
-        character.heal(200);
-        assertEquals(700, character.getHealth(), "Health should increase with healing");
+    public void testDealDamageWithinLevelDifference() {
+        character.dealDamage(target, 100);
+        assertEquals(900, target.getHealth());
     }
 
     @Test
-    public void testHealingDoesNotExceedMaxHealth() {
-        Character character = new Character();
-        character.heal(500);
-        assertEquals(1000, character.getHealth(), "Health should not exceed 1000");
+    public void testDealDamageHigherLevelTarget() {
+        Character higherLevelTarget = new Character(6);
+        character.dealDamage(higherLevelTarget, 100);
+        assertEquals(950, higherLevelTarget.getHealth());
     }
 
     @Test
-    public void testDeadCharacterCannotBeHealed() {
-        Character character = new Character();
-        character.dealDamage(character, 1200);
-        character.heal(200);
-        assertEquals(0, character.getHealth(), "Dead character should not be healed");
+    public void testDealDamageLowerLevelTarget() {
+        Character lowerLevelTarget = new Character(-4);
+        character.dealDamage(lowerLevelTarget, 100);
+        assertEquals(850, lowerLevelTarget.getHealth());
+    }
+
+    @Test
+    public void testDealDamageToDeadCharacter() {
+        character.dealDamage(target, 1000);
+        assertEquals(0, target.getHealth());
+        assertFalse(target.isAlive());
+    }
+
+    @Test
+    public void testSelfHealWhenAlive() {
+        target.dealDamage(character, 500);
+        character.selfHeal(300);
+        assertEquals(800, character.getHealth());
+    }
+
+    @Test
+    public void testSelfHealWhenHealthIsMax() {
+        character.selfHeal(100);
+        assertEquals(1000, character.getHealth());
+    }
+
+    @Test
+    public void testSelfHealWhenDead() {
+        target.dealDamage(character, 1000);
+        character.selfHeal(100);
+        assertEquals(0, character.getHealth());
+    }
+
+    @Test
+    public void testHealAnotherCharacter() {
+        character.dealDamage(target, 500);
+        character.heal(200, target);
+        assertEquals(700, target.getHealth());
+    }
+
+    @Test
+    public void testHealBeyondMaxHealth() {
+        character.heal(200, character);
+        assertEquals(1000, character.getHealth());
     }
 }
